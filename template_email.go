@@ -3,32 +3,27 @@ package main
 import (
 	"fmt"
 
+	"github.com/alexkappa/mustache"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
 var db *gorm.DB
+var param map[string]interface{}
 
 type Template struct {
-	Name       string
-	Language   string
-	Parameters map[string]interface{}
-	EmailTxt   string
+	Name     string
+	Subject  string
+	Body     string
+	Language string
 }
 
 func generateTemplate() {
-	param := map[string]interface{}{
-		"name":  "Stefano",
-		"promo": "freecoupon",
-	}
-
-	db.Create(&Template{Name: "Promo", Language: "Italian", EmailTxt: "Ciao", Parameters: param})
-	db.Create(&Template{Name: "Promo", Language: "English", EmailTxt: "Hello", Parameters: param})
+	db.Create(&Template{Name: "Promo", Subject: "Oggetto", Body: "<div>Ciao {{first_name}} {{last_name}} </div>", Language: "Italian"})
+	db.Create(&Template{Name: "Promo", Subject: "Subject", Body: "<div>Hello {{first_name}} {{last_name}} </div>", Language: "English"})
 }
 
-func retrieveTemplate(Name string, Language string) *Template {
-
-	t := Template{Name: Name, Language: Language}
+func retrieveTemplate(Name string, Language string, param map[string]interface{}) *Template {
 
 	db.AutoMigrate(&Template{})
 
@@ -37,8 +32,19 @@ func retrieveTemplate(Name string, Language string) *Template {
 	if template.Language == "" {
 		db.First(&template, "Name = ?", Name)
 	}
-	fmt.Println(template)
-	return &t
+
+	t := mustache.New()
+	err := t.ParseString(template.Body)
+	if err != nil {
+		// handle error
+	}
+	s, _ := t.RenderString(param)
+	if err != nil {
+		// handle error
+	}
+	fmt.Println(s)
+
+	return &template
 }
 
 func main() {
@@ -48,5 +54,10 @@ func main() {
 		panic("Connection failed")
 	}
 	//generateTemplate()
-	retrieveTemplate("Promo", "English")
+
+	param = make(map[string]interface{})
+	param["first_name"] = "Stefano"
+	param["last_name"] = "Frigerio"
+
+	retrieveTemplate("Promo", "Italian", param)
 }
