@@ -26,7 +26,8 @@ func retrieveTemplate(Name string) *Template {
 }
 
 func main() {
-	db, err := gorm.Open(sqlite.Open("template.db"), &gorm.Config{})
+	var err error
+	db, err = gorm.Open(sqlite.Open("template.db"), &gorm.Config{})
 	if err != nil {
 		panic("Connection failed")
 	}
