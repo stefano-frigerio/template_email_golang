@@ -38,11 +38,11 @@ func retrieveTemplate(Name string, Language string, param map[string]interface{}
 	if err != nil {
 		// handle error
 	}
-	s, _ := t.RenderString(param)
+	tbody, _ := t.RenderString(param)
 	if err != nil {
 		// handle error
 	}
-	fmt.Println(s)
+	template.Body = tbody
 
 	return &template
 }
@@ -59,5 +59,7 @@ func main() {
 	param["first_name"] = "Stefano"
 	param["last_name"] = "Frigerio"
 
-	retrieveTemplate("Promo", "Italian", param)
+	tempprint := retrieveTemplate("Promo", "English", param)
+
+	fmt.Println(tempprint)
 }
